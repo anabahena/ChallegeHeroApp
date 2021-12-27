@@ -8,12 +8,17 @@ import Details from "./views/WizardHeroes/Details";
 import {AppearanceProvider} from 'react-native-appearance';
 import * as Font from 'expo-font';
 import Search from "./views/WizardHeroes/Search";
+import Context from "./components/App/Context";
+import {setDataLocal} from "./lib/data";
+import methods from "./views/methods";
+import NetInfo from '@react-native-community/netinfo';
 
 const Stack = createNativeStackNavigator();
 
-const App = () => {
+const App = (callback, deps) => {
     const scheme = useColorScheme(),
-        [fontsReady, setFontsReady] = useState(false);
+        [fontsReady, setFontsReady] = useState(false),
+        [data, setData] = useState([]);
 
     const loadFonts = useCallback(async () => {
         await Font.loadAsync({
@@ -27,9 +32,40 @@ const App = () => {
         setFontsReady(true);
     }, [setFontsReady]);
 
+    const getLocalData = useCallback(async () => {
+        const localData = await setDataLocal(null);
+        setData(localData)
+    }, [])
+
+    const getHeroes = useCallback(async () => {
+        const request = async () => {
+            return await methods.getHeroes.create();
+        }
+        request()
+            .then(async (data) => {
+                setData(data);
+                await setDataLocal(data)
+            })
+            .catch(error => {
+                getLocalData()
+            });
+    }, [data]);
+
+
     useEffect(() => {
-        loadFonts()
+        getHeroes();
+        loadFonts();
     }, []);
+
+
+    useEffect(() => {
+        const unsubscribe = NetInfo.addEventListener(state => {
+            if (!state.isConnected) {
+                getLocalData()
+            }
+        });
+        unsubscribe();
+    })
 
 
     return (
@@ -37,19 +73,21 @@ const App = () => {
             {
                 (fontsReady) ?
                     <AppearanceProvider>
-                        <NavigationContainer theme={scheme === 'dark' ? ThemeDark : ThemeLight}>
-                            <Stack.Navigator>
-                                <Stack.Screen name="Home" component={Home} options={{
-                                    headerShown: false
-                                }}/>
-                                <Stack.Screen name="Detail" component={Details} options={{
-                                    headerShown: false
-                                }}/>
-                                <Stack.Screen name="Search" component={Search} options={{
-                                    headerShown: false
-                                }}/>
-                            </Stack.Navigator>
-                        </NavigationContainer>
+                        <Context.Provider value={{data, setData}}>
+                            <NavigationContainer theme={scheme === 'dark' ? ThemeDark : ThemeLight}>
+                                <Stack.Navigator>
+                                    <Stack.Screen name="Home" component={Home} options={{
+                                        headerShown: false
+                                    }}/>
+                                    <Stack.Screen name="Detail" component={Details} options={{
+                                        headerShown: false
+                                    }}/>
+                                    <Stack.Screen name="Search" component={Search} options={{
+                                        headerShown: false
+                                    }}/>
+                                </Stack.Navigator>
+                            </NavigationContainer>
+                        </Context.Provider>
                     </AppearanceProvider>
                     : null
             }
