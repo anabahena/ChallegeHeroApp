@@ -1,11 +1,9 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
-import {Content, Container, Header, Left, Body, Button, Right} from "native-base";
-import methods from "../methods";
-import {FlatList, StatusBar, View, ScrollView, Text, StyleSheet, useColorScheme} from 'react-native';
+import React, {useContext, useState} from 'react';
+import {Content, Container, Header, Left, Body, Button} from "native-base";
+import {FlatList, StatusBar, Text, StyleSheet, useColorScheme} from 'react-native';
 import Card from "../../components/Card";
 import {useTheme} from "@react-navigation/native";
-import {FontAwesome, Ionicons} from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {FontAwesome} from '@expo/vector-icons';
 import Context from "../../components/App/Context";
 
 const Home = ({navigation}) => {

@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {Content, Container, Header, Left, Button, Body, Input, Item} from "native-base";
 import {Entypo} from "@expo/vector-icons";
 import {Text, useColorScheme, StyleSheet, FlatList} from "react-native";
@@ -6,11 +6,13 @@ import {useTheme} from "@react-navigation/native";
 import methods from "../methods";
 import {SearchBar} from "react-native-elements";
 import Card from "../../components/Card";
+import Context from "../../components/App/Context";
 
 const Search = ({route, navigation}) => {
     const [query, setQuery] = useState(''),
         [loading, setLoading] = useState(false),
-        [heroes, setHeroes] = useState([]),
+        {data, setData} = useContext(Context),
+        [heroes, setHeroes] = useState(heroes ? heroes : data.length > 0 ? data :[]),
         {colors} = useTheme(),
         scheme = useColorScheme();
 
@@ -45,13 +47,12 @@ const Search = ({route, navigation}) => {
 
     useEffect(() => {
         filter(query);
-        if (query === '') {
+        if (!query) {
             getHeroes();
         }
 
     }, [query]);
 
-    console.log(heroes)
 
     const renderItem = ({item}) => {
         return (

@@ -1,9 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useContext} from "react";
-import Context from "../components/App/Context";
 
 const setDataLocal = async (data) => {
-
     const prev = await AsyncStorage.getItem('data');
     if (prev) return JSON.parse(prev);
     const value = JSON.stringify(data)
